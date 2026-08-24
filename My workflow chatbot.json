@@ -1,0 +1,224 @@
+{
+  "name": "My workflow 3 copy",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "Você é um assistente virtual de atendimento interno da Sirius Jeanswear.\n\nSua tarefa é responder às dúvidas dos colaboradores com base EXCLUSIVAMENTE nos documentos recuperados pela sua ferramenta de busca.\n\nDiretrizes obrigatórias:\n1. Se a informação solicitada não estiver presente nos documentos, responda que não encontrou a informação e sugira o contato com o setor responsável (RH, Jurídico, TI, etc.).\n2. Nunca invente dados, prazos ou regras que não constem na base.\n\nFormatação da Resposta:\nSempre formate sua resposta final em Markdown seguindo a estrutura abaixo:\n\n**Resumo Direto:**\n[Resposta clara e objetiva em 1 ou 2 frases]\n\n**Detalhes:**\n• [Ponto importante 1]\n• [Ponto importante 2]\n\n**Fonte Consultada:**\n📄 [Nome do documento ou setor citado]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        -80,
+        48
+      ],
+      "id": "209a6c9a-58da-40eb-84ea-f2d25aa88361",
+      "name": "AI Agent",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 2000
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.chat.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.4,
+      "position": [
+        16,
+        416
+      ],
+      "id": "0078fb97-603d-45b2-a767-2af06999004d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "\"Use esta ferramenta para consultar o Manual de Operações Internas da empresa e buscar informações sobre processos, regras, rotinas e diretrizes de trabalho.\"",
+        "memoryKey": {
+          "__rl": true,
+          "mode": "list",
+          "value": "vector_store_key"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        352
+      ],
+      "id": "7b9e8cff-99cc-4e47-b667-507028834c99",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "modelName": "embed-multilingual-v3.0"
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsCohere",
+      "typeVersion": 1,
+      "position": [
+        352,
+        512
+      ],
+      "id": "a928a540-32df-4fbf-8e11-a81d0a20dfa3",
+      "name": "Embeddings Cohere",
+      "credentials": {
+        "cohereApi": {
+          "id": "9fxUAcgWLqJiWYMP",
+          "name": "Cohere account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1.1,
+      "position": [
+        -224,
+        320
+      ],
+      "id": "931755aa-b61b-42f6-ba0d-ff983cac0794",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "2wWxlaBar3rVgGbd",
+          "name": "Google Gemini(PaLM) Api account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.5,
+      "position": [
+        -320,
+        112
+      ],
+      "id": "9e81dd9f-3040-4d54-992b-997226920100",
+      "name": "Telegram Trigger",
+      "webhookId": "1fc5aaed-4aee-48fd-837d-c5828694f56a",
+      "credentials": {
+        "telegramApi": {
+          "id": "XQQjOCU6lPPeVWa0",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        288,
+        96
+      ],
+      "id": "09c323dc-c08d-463e-9c5d-4577788e0dd8",
+      "name": "Send a text message",
+      "webhookId": "3a3ddeea-75fd-4df3-8720-0f04ee64e191",
+      "credentials": {
+        "telegramApi": {
+          "id": "XQQjOCU6lPPeVWa0",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Cohere": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "f7d93fb4-7d41-4133-9a0e-be38b581e4a0",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "7eac82c6121cafa81bc0bfcfcdd42bcf4230ae1de5c515fff8cb6b14d549f01f"
+  },
+  "nodeGroups": [],
+  "id": "3YNvRRGPlPjNarMr",
+  "tags": []
+}
