@@ -1,56 +1,48 @@
-# 🤖 Assistente Virtual RAG - Sirius Jeanswear
+# Sirius AI Assistant - Bot de Atendimento e RH
 
-Assistente inteligente integrado ao Telegram capaz de responder a dúvidas operacionais e políticas internas da empresa **Sirius Jeanswear** utilizando arquitetura RAG (Retrieval-Augmented Generation).
+Assistente virtual desenvolvido para automação de atendimento via Telegram, utilizando RAG (Retrieval-Augmented Generation) para responder dúvidas sobre regras, políticas de RH e conduta com precisão.
 
----
+## 🛠️ Tecnologias Utilizadas
+- **n8n**: Orquestração do fluxo de automação
+- **Google Gemini API**: Modelo de linguagem (LLM)
+- **Vector Store (In-Memory)**: Armazenamento vetorial para busca semântica (RAG)
+- **Cohere Embeddings**: Geração de vetores para os documentos
+- **Telegram Bot API**: Interface de comunicação com os usuários
 
-## 📌 Visão Geral do Projeto
-O objetivo deste projeto é otimizar o atendimento interno e a consulta de informações para colaboradores, permitindo o acesso rápido a documentos operacionais via Telegram através de um agente automatizado e contextualizado.
+## 🧱 Arquitetura do Fluxo
+1. **Trigger**: O nó do Telegram captura as mensagens recebidas no chat.
+2. **Contexto & RAG**: A mensagem do usuário busca trechos relevantes armazenados no Vector Store através de busca vetorial.
+3. **Processamento**: O AI Agent envia o prompt enriquecido com o contexto resgatado para a API do Google Gemini.
+4. **Resposta**: O bot responde diretamente ao usuário no Telegram.
 
----
+## ❓ Exemplo de perguntas e Respostas Suportadas pelo Agente
+O agente foi treinado com a base de conhecimento interna para responder a tópicos como:
+- **Políticas de RH:** Solicitação de informações sobre folha de pagamento, benefícios e reembolsos de despesas (como retenção fiscal e vouchers de reembolso).
+- **Regras e Conduta:** Diretrizes de integridade, conduta ética, uso adequado dos canais da empresa e ambiente de trabalho.
+- **Procedimentos Internos:** Orientações sobre o uso do Manual de Operações e prazos para envio de documentações financeiras/contábeis.
 
-## 🛠️ Arquitetura e Tecnologias
-- **Orquestração de Fluxo:** [n8n](https://n8n.io/)
-- **Modelo de Linguagem (LLM):** Google Gemini 1.5 Flash
-- **Embeddings & Base Vetorial:** Cohere Embeddings + Vector Store (n8n In-Memory / Qdrant)
-- **Canal de Comunicação:** Telegram Bot API
-- **Documento Base:** Manual de Operações Internas - Sirius Jeanswear (PDF)
+## 🚀 Como Importar e Rodar este Projeto
+1. Instale/Suba uma instância do n8n (local ou via Railway).
+2. Crie um novo Workflow e clique em **`...` > Import from File**.
+3. Selecione o arquivo `.json` deste repositório.
+4. Configure as credenciais no n8n para:
+   - Telegram Bot API Token
+   - Google Gemini API Key
+   - Cohere API Key
+5. Ative o Workflow em **Published**.
 
----
+## 🔗 Links Úteis
+- **Bot no Telegram**: [@siriusjeansaiBot](https://t.me/siriusjeansaiBot)
+- **Vídeo de Demonstração**: 
 
-## 🚀 Como Executar o Projeto
 
-### Pré-requisitos
-1. Instância do **n8n** (rodando localmente via Docker/npx ou hospedado na nuvem).
-2. Conta no Telegram e um bot criado via `@BotFather` para obter o `HTTP API Token`.
-3. Chaves de API configuradas para:
-   - Google Gemini API
-   - Cohere API
+https://github.com/user-attachments/assets/c4c9dbf0-a12b-4d45-9d33-f5ddc8baef82
 
-### Passo a Passo
-1. Importe o arquivo JSON do fluxo (`workflow.json`) localizado neste repositório para o seu n8n.
-2. Configure as credenciais das APIs no n8n (Telegram, Gemini, Cohere).
-3. Faça o upload do documento PDF na base de conhecimento.
-4. Ative a chave **Publish / Active** no n8n.
-5. Inicie a conversa com o bot no Telegram.
 
----
 
-## 💬 Exemplos de Perguntas e Respostas
 
-> **Usuário:** Qual é a política de trocas da Sirius Jeanswear?  
-> **Bot:** *Com base no Manual de Operações Internas, as trocas podem ser realizadas em até 30 dias mediante apresentação do comprovante de compra e etiqueta afixada.*  
-> 📄 *Fonte: Manual_Operacoes_Sirius.pdf*
 
-> **Usuário:** Quem é o responsável pelo setor de logística?  
-> **Bot:** *O setor de logística é gerenciado por [Nome do Responsável], conforme a Seção 3 do Manual Interno.*  
-> 📄 *Fonte: Manual_Operacoes_Sirius.pdf*
 
----
 
-## 📸 Demonstração do Funcionamento
 
-*(Adicione aqui os prints do bot respondendo no Telegram e do fluxo no n8n)*
 
-![Fluxo n8n](./prints/n8n-workflow.png)
-![Demonstração Telegram](./prints/telegram-demo.png)
